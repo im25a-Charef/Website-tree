@@ -2,7 +2,8 @@ from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
 # Number of links to extract from the page
-link_tree_width = 5
+link_tree_width = 5000
+domain = "https://moodle.zli.ch/course/section.php?id=30164".replace("https://", "") # ".replace", so we can work with the link nomatter if the full link was given.
 
 def get_links(html):
     """Extracts links from the HTML content."""
@@ -25,16 +26,24 @@ def get_links(html):
 with sync_playwright() as p:
     # We make it headless for speed and to make it seem less cluncky
     browser = p.chromium.launch(headless=True)
-    page = browser.new_page()
 
-    # Example of a wikipedia page
-    page.goto("https://en.wikipedia.org/wiki/Main_Page")
+    browsercontext = browser.new_context()
+
+    browsercontext.add_cookies([
+        {
+            "name": "MoodleSession",
+            "value": "ADD SESSION COOKIE HERE", # value is the session cookie
+            "domain": domain, # Here given domain can be used
+            "path": "/" # Path is always /
+        }
+    ])
+
+    page = browsercontext.new_page()
+    page.goto(f"https://{domain}") # Here we can add the https back in, because we know that it's not there anyway
     html_content = page.content()
     extracted_links = get_links(html_content)
 
     # Printing the title and links
     print(f"Page Title: {page.title()}\nlinks: {extracted_links}")
-
-    page.screenshot(path="example.png")
 
     browser.close()
