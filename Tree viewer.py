@@ -64,7 +64,7 @@ class Leaf:
             color,
             name,
             sibling_of=None,
-            children_of= [],
+            children_of= None,
             sibling_l=None,
             offset=sib_offset
     ):
